@@ -1,527 +1,365 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Tripro Dashboard</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
-    
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
+    <title>Super Tripro - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        window.FirebaseSDK = { initializeApp, getDatabase, ref, set, onValue };
+    </script>
     <style>
-        :root {
-            --bg-gradient: linear-gradient(135deg, #e0f2fe 0%, #fbcfe8 50%, #fef3c7 100%);
-            --card-bg: rgba(255, 255, 255, 0.85);
-            --text-dark: #334155;
-            --primary-blue: #7dd3fc;
-            --button-blue: #3b82f6;
-            --button-pink: #f472b6;
-            --button-pink-light: #fce7f3;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
-        }
-
         body {
-            background: var(--bg-gradient);
-            min-height: 100vh;
-            padding: 20px;
-            color: var(--text-dark);
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 480px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        /* --- HEADER SECTION --- */
-        .header {
-            text-align: center;
-            padding: 10px 0;
-        }
-        .header h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #f59e0b;
-            text-shadow: 2px 2px 0px #1e3a8a, -1px -1px 0px #1e3a8a, 1px -1px 0px #1e3a8a, -1px 1px 0px #1e3a8a;
-            letter-spacing: 1px;
-        }
-
-        /* --- CARD STYLE --- */
-        .card {
-            background: var(--card-bg);
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-        }
-
-        .card-title {
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* --- CONFIG & CONNECTION ROW --- */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
-
-        /* Firebase Form */
-        .input-group {
-            margin-bottom: 12px;
-        }
-        .input-group label {
-            font-size: 0.7rem;
-            font-weight: 600;
-            display: block;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-            color: #64748b;
-        }
-        .input-group input {
-            width: 100%;
-            padding: 10px 14px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            background: linear-gradient(to bottom, #eff6ff, #ffffff);
-            font-size: 0.85rem;
-            outline: none;
-        }
-        .btn-firebase {
-            width: 100%;
-            padding: 12px;
-            background: #7e99b6;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 8px;
-            transition: background 0.2s;
-        }
-        .btn-firebase:hover { background: #647a94; }
-
-        /* Microbit Card */
-        .microbit-info {
-            font-size: 0.75rem;
-            color: #ec4899;
-            margin-bottom: 16px;
-            line-height: 1.4;
-        }
-        .btn-connect {
-            width: 100%;
-            padding: 12px;
-            background: #f472b6;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-        .btn-disconnect {
-            width: 100%;
-            padding: 12px;
-            background: #fce7f3;
-            color: #db2777;
-            border: none;
-            border-radius: 20px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* --- LIVE DATA BAR --- */
-        .live-bar {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #db2777;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .live-bar::after {
-            content: '';
-            flex: 1;
-            height: 3px;
-            background: #f472b6;
-            border-radius: 2px;
-            opacity: 0.5;
-        }
-
-        /* --- SENSOR & RELAY ROW --- */
-        .sensor-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        /* Ultrasonic Box */
-        .sensor-val {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #3b82f6;
-            margin-top: 10px;
-            text-align: center;
-        }
-        .sensor-unit {
-            font-size: 0.9rem;
-            color: #64748b;
-        }
-
-        /* Relay Box */
-        .relay-tag {
-            background: #f3e8ff;
-            color: #a855f7;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-block;
-        }
-        .icon-center {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 10px 0;
-        }
-        .icon-svg {
-            width: 50px;
-            height: 50px;
-            fill: #cbd5e1;
-            transition: fill 0.3s;
-        }
-        .icon-svg.active {
-            fill: #a855f7;
-        }
-        .icon-led.active {
-            fill: #3b82f6;
-        }
-        .status-subtext {
-            font-size: 0.65rem;
-            color: #94a3b8;
-            text-align: center;
-            margin-top: 4px;
-        }
-
-        /* --- MANUAL CONTROL --- */
-        .manual-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .manual-label {
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-        .manual-btns {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            width: 60%;
-        }
-        .btn-ctrl {
-            border: none;
-            padding: 10px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-        }
-        .btn-ctrl.on { background: #e0f2fe; color: #0369a1; }
-        .btn-ctrl.off { background: #ffe4e6; color: #b91c1c; }
-
-        /* --- TERMINAL --- */
-        .terminal-header {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.75rem;
-            color: #64748b;
-            margin-bottom: 8px;
-        }
-        .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        .dot-red { background: #ef4444; }
-        .dot-yellow { background: #f59e0b; }
-        .dot-blue { background: #3b82f6; }
-        
-        .terminal-screen {
-            background: #ebdcf0;
-            border-radius: 16px;
-            height: 120px;
-            padding: 12px;
-            font-family: monospace;
-            font-size: 0.75rem;
-            color: #4a1d49;
-            overflow-y: auto;
-            white-space: pre-wrap;
+            background: linear-gradient(180deg, #E0F2FE 0%, #FCE7F3 50%, #FEF3C7 100%);
         }
     </style>
 </head>
-<body>
+<body class="min-h-screen font-sans p-6 text-gray-700">
 
-<div class="container">
-
-    <div class="header">
-        <h1>SUPER TRIPRO</h1>
+    <div class="max-w-4xl mx-auto text-center mb-8 relative">
+        <h1 class="text-4xl font-extrabold text-blue-600 tracking-wider uppercase drop-shadow">
+            ⭐ SUPER TRIPRO ⭐
+        </h1>
+        <p class="text-xs text-gray-500 mt-1">IoT Micro:bit Controller Terminal</p>
     </div>
 
-    <div class="grid-2">
-        <div class="card">
-            <div class="card-title">Firebase Cloud Sync</div>
-            <div class="input-group">
-                <label>API KEY</label>
-                <input type="text" id="apiKey" placeholder="Masukkan API Key...">
+    <div class="max-w-4xl mx-auto space-y-6">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+                <h2 class="font-bold text-lg mb-4 text-gray-800">Firebase Cloud Sync</h2>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">API Key</label>
+                        <input id="apiKey" type="password" class="w-full px-3 py-2 bg-blue-50/50 border border-blue-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Database URL</label>
+                        <input id="dbUrl" type="text" placeholder="https://your-db.firebaseio.com" class="w-full px-3 py-2 bg-blue-50/50 border border-blue-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Node Path</label>
+                        <input id="nodePath" type="text" placeholder="microbit/data" class="w-full px-3 py-2 bg-blue-50/50 border border-blue-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm">
+                    </div>
+                    <button id="btnFirebase" class="w-full mt-2 bg-slate-500 hover:bg-slate-600 text-white font-medium py-2 px-4 rounded-xl transition duration-200 text-sm shadow-sm">
+                        Connect to Firebase
+                    </button>
+                </div>
             </div>
-            <div class="input-group">
-                <label>DATABASE URL</label>
-                <input type="text" id="dbUrl" placeholder="https://your-db.firebaseio.com">
+
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="font-bold text-lg text-gray-800">Microbit Bluetooth</h2>
+                        <span id="btStatus" class="px-2 py-1 text-xs font-bold rounded-full bg-red-100 text-red-600 uppercase">Disconnected</span>
+                    </div>
+                    <p class="text-xs text-pink-500 leading-relaxed mb-4">
+                        Make sure your Micro:bit is powered on and the Bluetooth UART extension is active in MakeCode.
+                    </p>
+                </div>
+                <div class="space-y-2">
+                    <button id="btnConnectBT" class="w-full bg-pink-400 hover:bg-pink-500 text-white font-medium py-2.5 px-4 rounded-xl transition duration-200 text-sm shadow-sm">
+                        Connect Microbit
+                    </button>
+                    <button id="btnDisconnectBT" class="w-full bg-pink-100 hover:bg-pink-200 text-pink-700 font-medium py-2.5 px-4 rounded-xl transition duration-200 text-sm">
+                        Disconnect
+                    </button>
+                </div>
             </div>
-            <div class="input-group">
-                <label>NODE PATH</label>
-                <input type="text" id="nodePath" placeholder="device1/data">
-            </div>
-            <button class="btn-firebase" onclick="connectFirebase()">Connect to Firebase</button>
         </div>
 
-        <div class="card">
-            <div class="card-title">Microbit Bluetooth</div>
-            <div class="microbit-info">
-                Pastikan Microbit menyala dan ekstensi Bluetooth UART aktif di makecode.
-            </div>
-            <button class="btn-connect" onclick="connectMicrobit()">Connect Microbit</button>
-            <button class="btn-disconnect" onclick="disconnectMicrobit()">Disconnect</button>
+        <div class="flex items-center space-x-2 px-2">
+            <span class="flex h-2 w-2 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
+            </span>
+            <span class="text-xs font-bold tracking-wider text-pink-500 uppercase">Live Sensor Data</span>
+            <div class="h-[2px] bg-pink-200 flex-1 rounded-full"></div>
         </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center space-x-2 text-blue-500 mb-4">
+                        <i class="fa-solid fa-circle-nodes text-lg"></i>
+                        <h3 class="font-bold text-gray-800">Ultrasonic Sensor</h3>
+                    </div>
+                    <div class="flex items-baseline space-x-2 my-6">
+                        <span id="lblDistance" class="text-5xl font-black text-blue-600 tracking-tight">--</span>
+                        <span class="text-gray-400 font-bold text-lg">cm</span>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-400 border-t pt-3">Measures obstacles distance via real-time telemetry.</p>
+            </div>
+
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                    <div class="flex items-center space-x-2 text-purple-500">
+                        <span class="bg-purple-100 text-purple-600 px-2.5 py-1 rounded-lg text-xs font-bold uppercase">Relay</span>
+                    </div>
+                    <i id="iconRelay" class="fa-solid fa-bolt text-4xl text-gray-200 transition-colors duration-300"></i>
+                </div>
+                <div class="mt-6">
+                    <span id="lblRelayState" class="text-sm font-bold text-gray-400 uppercase">Status: OFF</span>
+                    <p class="text-xs text-gray-400 border-t pt-3 mt-3">Controls high voltage components automatically or manually.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span class="font-bold text-gray-700 tracking-wide">Manual Control</span>
+            <div class="flex space-x-3 w-full sm:w-auto">
+                <button id="btnManualOn" class="flex-1 sm:flex-initial bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold py-3 px-8 rounded-2xl transition duration-200 text-sm tracking-wider uppercase">
+                    ON
+                </button>
+                <button id="btnManualOff" class="flex-1 sm:flex-initial bg-pink-50 hover:bg-pink-100 text-pink-600 font-bold py-3 px-8 rounded-2xl transition duration-200 text-sm tracking-wider uppercase">
+                    OFF
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <span class="bg-blue-400 text-white px-3 py-1 rounded-xl text-xs font-bold tracking-wider uppercase">LED</span>
+                <i id="iconLed" class="fa-solid fa-lightbulb text-4xl text-gray-200 transition-colors duration-300"></i>
+            </div>
+            <div>
+                <span id="lblLedState" class="text-sm font-bold text-gray-400 uppercase">Status: OFF</span>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
+            <div class="flex items-center space-x-2 mb-3">
+                <div class="flex space-x-1.5">
+                    <div class="w-3 h-3 rounded-full bg-pink-400"></div>
+                    <div class="w-3 h-3 rounded-full bg-pink-300"></div>
+                    <div class="w-3 h-3 rounded-full bg-blue-400"></div>
+                </div>
+                <span class="text-xs font-mono text-gray-400 ml-2">system_terminal:~supertripro</span>
+            </div>
+            <div id="terminal" class="bg-purple-50 rounded-2xl p-4 h-40 overflow-y-auto font-mono text-xs text-purple-900 space-y-1 scrollbar-thin">
+                <div class="text-purple-400">[System initialized. Ready for connections.]</div>
+            </div>
+        </div>
+
     </div>
 
-    <div class="live-bar">
-        <span>((•)) Live sensor data</span>
-    </div>
+    <script>
+        // UUIDs standard for Micro:bit Bluetooth UART Service
+        const UART_SERVICE_UUID = "6e400001-b5a3-13a3-e54e-e2591c069614";
+        const TX_CHARACTERISTIC_UUID = "6e400002-b5a3-13a3-e54e-e2591c069614"; // Receive from microbit
+        const RX_CHARACTERISTIC_UUID = "6e400003-b5a3-13a3-e54e-e2591c069614"; // Write to microbit
 
-    <div class="sensor-grid">
-        <div class="card">
-            <div class="card-title" style="color:#3b82f6;">🌐 Ultrasonic Sensor</div>
-            <div class="sensor-val"><span id="ultraValue">0</span> <span class="sensor-unit">cm</span></div>
-            <div class="status-subtext" style="margin-top:20px;">Mendeteksi jarak objek</div>
-        </div>
+        // State Variables
+        let bluetoothDevice = null;
+        let rxCharacteristic = null; // Used to send commands to Microbit
+        let db = null;
+        let isFirebaseConnected = false;
 
-        <div class="card" style="position: relative;">
-            <span class="relay-tag">Relay</span>
-            <div class="icon-center">
-                <svg class="icon-svg" id="relayIcon" viewBox="0 0 24 24">
-                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-                </svg>
-            </div>
-            <div class="status-subtext">Koneksi untuk mengontrol nyala dan matinya daya</div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="manual-container">
-            <div class="manual-label">Manual Control</div>
-            <div class="manual-btns">
-                <button class="btn-ctrl on" onclick="setManualControl(true)">ON</button>
-                <button class="btn-ctrl off" onclick="setManualControl(false)">OFF</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="sensor-grid">
-        <div class="card">
-            <span class="relay-tag" style="background:#e0f2fe; color:#0369a1;">LED</span>
-            <div class="icon-center">
-                <svg class="icon-svg icon-led" id="ledIcon" viewBox="0 0 24 24">
-                    <path d="M12 2c-3.86 0-7 3.14-7 7 0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2 19h-4c-.55 0-1 .45-1 1s.45 1 1 1h4c.55 0 1-.45 1-1s-.45-1-1-1z"/>
-                </svg>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="terminal-header">
-            <span class="dot dot-red"></span>
-            <span class="dot dot-yellow"></span>
-            <span class="dot dot-blue"></span>
-            <span>system_terminal:~supertripro</span>
-        </div>
-        <div class="terminal-screen" id="terminal">System initialized. Waiting for connection...</div>
-    </div>
-
-</div>
-
-<script>
-    // --- VARIABEL GLOBAL ---
-    let bluetoothDevice = null;
-    let txCharacteristic = null; // Untuk kirim data ke microbit
-    let rxCharacteristic = null; // Untuk terima data dari microbit
-    let firebaseDB = null;
-    let isConnectedToMicrobit = false;
-
-    // UUID standar untuk Layanan Nordic UART (digunakan oleh ekstensi Bluetooth Microbit)
-    const UART_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-    const TX_CHAR_UUID      = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // Kirim ke Microbit
-    const RX_CHAR_UUID      = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // Terima dari Microbit
-
-    // --- FUNGSI TERMINAL ---
-    function logToTerminal(message, type = 'info') {
+        // UI Element Selectors
         const terminal = document.getElementById('terminal');
-        const timestamp = new Date().toLocaleTimeString();
-        terminal.innerText += `\n[${timestamp}] [${type.toUpperCase()}] ${message}`;
-        terminal.scrollTop = terminal.scrollHeight;
-    }
+        const btStatus = document.getElementById('btStatus');
+        const btnConnectBT = document.getElementById('btnConnectBT');
+        const btnDisconnectBT = document.getElementById('btnDisconnectBT');
+        const btnFirebase = document.getElementById('btnFirebase');
+        const lblDistance = document.getElementById('lblDistance');
+        const iconRelay = document.getElementById('iconRelay');
+        const lblRelayState = document.getElementById('lblRelayState');
+        const iconLed = document.getElementById('iconLed');
+        const lblLedState = document.getElementById('lblLedState');
+        const btnManualOn = document.getElementById('btnManualOn');
+        const btnManualOff = document.getElementById('btnManualOff');
 
-    // --- LOGIKA FIREBASE ---
-    function connectFirebase() {
-        const apiKey = document.getElementById('apiKey').value.trim();
-        const databaseURL = document.getElementById('dbUrl').value.trim();
-        
-        if (!apiKey || !databaseURL) {
-            logToTerminal("Gagal Koneksi Firebase: API Key / DB URL Kosong", "error");
-            alert("Harap isi API Key dan Database URL Firebase!");
-            return;
-        }
-
-        try {
-            // Inisialisasi Instansi Firebase baru
-            const config = { apiKey: apiKey, databaseURL: databaseURL };
-            
-            // Cek jika app sudah terinisialisasi sebelumnya, hapus dulu agar tidak konflik
-            if (firebase.apps.length) {
-                firebase.app().delete();
+        // Helper to log info inside our customized UI Terminal
+        function logToTerminal(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            if (type === 'error') {
+                logEntry.className = 'text-red-500 font-semibold';
+                logEntry.innerHTML = `[${timestamp}] ❌ ${message}`;
+            } else if (type === 'success') {
+                logEntry.className = 'text-green-600 font-semibold';
+                logEntry.innerHTML = `[${timestamp}] ✔️ ${message}`;
+            } else {
+                logEntry.className = 'text-purple-800';
+                logEntry.innerHTML = `[${timestamp}] ℹ️ ${message}`;
             }
+            terminal.appendChild(logEntry);
+            terminal.scrollTop = terminal.scrollHeight; // Auto-scroll to bottom
+        }
+
+        // ==========================================
+        // 1. MICROBIT BLUETOOTH LOGIC
+        // ==========================================
+        async function connectMicrobit() {
+            logToTerminal("Requesting Micro:bit Bluetooth Device...");
+            try {
+                bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    filters: [{ namePrefix: 'BBC micro:bit' }],
+                    optionalServices: [UART_SERVICE_UUID]
+                });
+
+                logToTerminal(`Connecting to GATT Server on: ${bluetoothDevice.name}`);
+                const server = await bluetoothDevice.gatt.connect();
+
+                logToTerminal("Fetching UART Service...");
+                const service = await server.getPrimaryService(UART_SERVICE_UUID);
+
+                logToTerminal("Setting up Tx/Rx characteristics...");
+                // Tx (Microbit -> Web)
+                const txCharacteristic = await service.getCharacteristic(TX_CHARACTERISTIC_UUID);
+                await txCharacteristic.startNotifications();
+                txCharacteristic.addEventListener('characteristicvaluechanged', handleIncomingData);
+
+                // Rx (Web -> Microbit)
+                rxCharacteristic = await service.getCharacteristic(RX_CHARACTERISTIC_UUID);
+
+                // Update UI Connection Status
+                btStatus.textContent = "Connected";
+                btStatus.className = "px-2 py-1 text-xs font-bold rounded-full bg-green-100 text-green-600 uppercase";
+                logToTerminal(`Successfully connected to ${bluetoothDevice.name}!`, 'success');
+
+                // Logic: "Jika website sudah tersambung dengan microbit maka relay akan menyala"
+                setActuatorsState(true);
+
+            } catch (error) {
+                logToTerminal(error.message, 'error');
+            }
+        }
+
+        function disconnectMicrobit() {
+            if (bluetoothDevice && bluetoothDevice.gatt.connected) {
+                bluetoothDevice.gatt.disconnect();
+                btStatus.textContent = "Disconnected";
+                btStatus.className = "px-2 py-1 text-xs font-bold rounded-full bg-red-100 text-red-600 uppercase";
+                logToTerminal("Micro:bit Bluetooth disconnected manually.");
+                setActuatorsState(false);
+            } else {
+                logToTerminal("No Micro:bit device connected to close.", 'error');
+            }
+        }
+
+        // Process Incoming Serial Data from Micro:bit (Expecting standard string or numbers)
+        function handleIncomingData(event) {
+            const value = event.target.value;
+            let enc = new TextDecoder("utf-8");
+            let receivedString = enc.decode(value).trim();
             
-            firebase.initializeApp(config);
-            firebaseDB = firebase.database();
+            // Logic: "dibagian ultrasonic aku ingin muncul angka jarak"
+            if (!isNaN(receivedString) && receivedString !== "") {
+                const distance = parseInt(receivedString);
+                lblDistance.textContent = distance;
+                
+                // Sync data directly to cloud if Firebase config is ready
+                syncToFirebase(distance);
+            }
+        }
+
+        // Send a serial command string back to the Micro:bit hardware
+        async function sendMicrobitCommand(command) {
+            if (!rxCharacteristic) return;
+            try {
+                let encoder = new TextEncoder();
+                await rxCharacteristic.writeValue(encoder.encode(command + "\n"));
+            } catch (error) {
+                logToTerminal("Failed to send command to Micro:bit: " + error.message, 'error');
+            }
+        }
+
+        // Helper to instantly handle logic states for Relay & LED altogether
+        function setActuatorsState(turnOn) {
+            if (turnOn) {
+                iconRelay.className = "fa-solid fa-bolt text-4xl text-purple-500 animate-pulse";
+                lblRelayState.textContent = "Status: ON";
+                lblRelayState.className = "text-sm font-bold text-purple-600 uppercase";
+
+                iconLed.className = "fa-solid fa-lightbulb text-4xl text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]";
+                lblLedState.textContent = "Status: ON";
+                lblLedState.className = "text-sm font-bold text-blue-600 uppercase";
+                
+                sendMicrobitCommand("RELAY_ON");
+                sendMicrobitCommand("LED_ON");
+            } else {
+                iconRelay.className = "fa-solid fa-bolt text-4xl text-gray-200";
+                lblRelayState.textContent = "Status: OFF";
+                lblRelayState.className = "text-sm font-bold text-gray-400 uppercase";
+
+                iconLed.className = "fa-solid fa-lightbulb text-4xl text-gray-200";
+                lblLedState.textContent = "Status: OFF";
+                lblLedState.className = "text-sm font-bold text-gray-400 uppercase";
+                
+                sendMicrobitCommand("RELAY_OFF");
+                sendMicrobitCommand("LED_OFF");
+            }
+        }
+
+        // ==========================================
+        // 2. FIREBASE REALTIME CLOUD LOGIC
+        // ==========================================
+        function connectFirebase() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const databaseURL = document.getElementById('dbUrl').value.trim();
+            const nodePath = document.getElementById('nodePath').value.trim();
+
+            if (!apiKey || !databaseURL || !nodePath) {
+                logToTerminal("Please fill all Firebase authentication fields.", 'error');
+                return;
+            }
+
+            try {
+                const firebaseConfig = { apiKey, databaseURL };
+                // Initialize modern instance
+                const app = window.FirebaseSDK.initializeApp(firebaseConfig, "SupertriproApp");
+                db = window.FirebaseSDK.getDatabase(app);
+                isFirebaseConnected = true;
+                logToTerminal("Connected to Firebase Realtime Database!", "success");
+
+                // Listen to Node Path changes if modified externally
+                const dataRef = window.FirebaseSDK.ref(db, nodePath);
+                window.FirebaseSDK.onValue(dataRef, (snapshot) => {
+                    const data = snapshot.val();
+                    if (data !== null && typeof data === 'object' && data.distance !== undefined) {
+                        lblDistance.textContent = data.distance;
+                    }
+                });
+            } catch (err) {
+                logToTerminal(`Firebase Setup Failed: ${err.message}`, 'error');
+            }
+        }
+
+        function syncToFirebase(distanceValue) {
+            if (!isFirebaseConnected || !db) return;
+            const nodePath = document.getElementById('nodePath').value.trim();
+            const dataRef = window.FirebaseSDK.ref(db, nodePath);
             
-            logToTerminal("Terhubung dengan Firebase Cloud Database!", "success");
-            alert("Berhasil terhubung ke Firebase!");
-        } catch (error) {
-            logToTerminal(`Firebase Error: ${error.message}`, "error");
-        }
-    }
-
-    function pushToFirebase(dataObj) {
-        const nodePath = document.getElementById('nodePath').value.trim() || "microbit_data";
-        if (firebaseDB) {
-            firebaseDB.ref(nodePath).update(dataObj)
-                .catch(err => logToTerminal(`Gagal Push Firebase: ${err.message}`, "error"));
-        }
-    }
-
-    // --- LOGIKA BLUETOOTH MICROBIT ---
-    async function connectMicrobit() {
-        logToTerminal("Mencari perangkat Micro:bit...", "info");
-        try {
-            bluetoothDevice = await navigator.bluetooth.requestDevice({
-                filters: [{ namePrefix: 'BBC micro:bit' }],
-                optionalServices: [UART_SERVICE_UUID]
-            });
-
-            logToTerminal(`Menghubungkan ke perangkat: ${bluetoothDevice.name}`, "info");
-            const server = await bluetoothDevice.gatt.connect();
-            
-            logToTerminal("Mencari Layanan UART...", "info");
-            const service = await server.getPrimaryService(UART_SERVICE_UUID);
-
-            // Setup Karakteristik untuk Mengirim & Menerima Data
-            txCharacteristic = await service.getCharacteristic(TX_CHAR_UUID);
-            rxCharacteristic = await service.getCharacteristic(RX_CHAR_UUID);
-
-            // Mulai mendengarkan data dari Microbit
-            await rxCharacteristic.startNotifications();
-            rxCharacteristic.addEventListener('characteristicvaluechanged', handleIncomingData);
-
-            // Logika Sukses Terkoneksi:
-            isConnectedToMicrobit = true;
-            logToTerminal("Micro:bit Berhasil Terkoneksi via Bluetooth!", "success");
-            
-            // Otomatis Nyalakan Relay & LED sesuai instruksi logika Anda saat sukses konek
-            setHardwareState(true); 
-
-        } catch (error) {
-            logToTerminal(`Koneksi Bluetooth Gagal: ${error.message}`, "error");
-        }
-    }
-
-    function disconnectMicrobit() {
-        if (bluetoothDevice && bluetoothDevice.gatt.connected) {
-            bluetoothDevice.gatt.disconnect();
-            logToTerminal("Micro:bit Terputus.", "info");
-        }
-        isConnectedToMicrobit = false;
-        setHardwareState(false);
-    }
-
-    // Mengubah UI Relay & LED serta Mengirim Sinyal ke Microbit jika terhubung
-    function setHardwareState(isOn) {
-        const relayIcon = document.getElementById('relayIcon');
-        const ledIcon = document.getElementById('ledIcon');
-
-        if (isOn) {
-            relayIcon.classList.add('active');
-            ledIcon.classList.add('active');
-            sendToMicrobit("1"); // Kirim kode "1" artinya ON ke Microbit
-        } else {
-            relayIcon.classList.remove('active');
-            ledIcon.classList.remove('active');
-            sendToMicrobit("0"); // Kirim kode "0" artinya OFF ke Microbit
-        }
-    }
-
-    // Fungsi Pengendalian Manual dari Tombol ON / OFF Website
-    function setManualControl(status) {
-        if (!isConnectedToMicrobit) {
-            logToTerminal("Aksi Ditolak: Sambungkan Microbit terlebih dahulu!", "error");
-            return;
-        }
-        setHardwareState(status);
-        logToTerminal(`Kontrol Manual diubah menjadi: ${status ? 'ON' : 'OFF'}`, "info");
-        pushToFirebase({ manual_control: status ? "ON" : "OFF" });
-    }
-
-    // Mengirim Data String ke Microbit via Bluetooth UART
-    function sendToMicrobit(message) {
-        if (txCharacteristic && isConnectedToMicrobit) {
-            let encoder = new TextEncoder();
-            txCharacteristic.writeValue(encoder.encode(message + "\n"))
-                .catch(err => logToTerminal(`Gagal Mengirim Data ke Microbit: ${err.message}`, "error"));
-        }
-    }
-
-    // Mengolah Data yang Masuk dari Sensor Ultrasonic Microbit
-    function handleIncomingData(event) {
-        let decoder = new TextDecoder('utf-8');
-        let dataString = decoder.decode(event.target.value).trim();
-        
-        // Memastikan data berupa angka jarak valid
-        if (dataString && !isNaN(dataString)) {
-            let jarak = parseInt(dataString);
-            document.getElementById('ultraValue').innerText = jarak;
-            
-            // Kirim pula data real-time sensor tersebut ke Firebase Cloud Sync
-            pushToFirebase({
-                ultrasonic_distance: jarak,
+            window.FirebaseSDK.set(dataRef, {
+                distance: distanceValue,
                 timestamp: new Date().toISOString()
+            }).catch(err => {
+                logToTerminal(`Cloud Sync Error: ${err.message}`, 'error');
             });
         }
-    }
-</script>
 
+        // ==========================================
+        // 3. UI MANUAL CONTROL EVENT LISTENERS
+        // ==========================================
+        btnConnectBT.addEventListener('click', connectMicrobit);
+        btnDisconnectBT.addEventListener('click', disconnectMicrobit);
+        btnFirebase.addEventListener('click', connectFirebase);
+
+        // Manual controls logic: override state settings perfectly
+        btnManualOn.addEventListener('click', () => {
+            logToTerminal("Manual Control: Actuators turned ON via Website Dashboard.");
+            setActuatorsState(true);
+        });
+
+        btnManualOff.addEventListener('click', () => {
+            logToTerminal("Manual Control: Actuators turned OFF via Website Dashboard.");
+            setActuatorsState(false);
+        });
+    </script>
 </body>
 </html>
