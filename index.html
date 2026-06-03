@@ -4,291 +4,126 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Tripro Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            /* Background gradient matching the uploaded UI image */
-            background: linear-gradient(180deg, #E2EFF9 0%, #F5D6E3 50%, #FFF5E1 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
-        }
-    </style>
-</head>
-<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
-
-    <div class="text-center mb-8 mt-4">
-        <h1 class="text-4xl md:text-5xl font-black italic tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)] uppercase">
-            SUPER TRIPRO
-        </h1>
-        <p class="text-xs text-slate-500 tracking-widest mt-1">IoT CONTROL CENTER</p>
-    </div>
-
-    <div class="w-full max-w-4xl space-y-6">
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="glass-card p-6 flex flex-col justify-between">
-                <div>
-                    <h2 class="text-lg font-semibold text-slate-700 mb-4">Firebase Cloud Sync</h2>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">API Key</label>
-                            <input id="apiKey" type="text" placeholder="Enter your Firebase API Key" class="w-full px-4 py-2 rounded-xl bg-gradient-to-r from-blue-50 to-white border border-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm">
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Database URL</label>
-                            <input id="dbUrl" type="text" placeholder="https://your-db.firebaseio.com" class="w-full px-4 py-2 rounded-xl bg-gradient-to-r from-blue-50 to-white border border-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm">
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Node Path</label>
-                            <input id="nodePath" type="text" placeholder="e.g., sensorData" class="w-full px-4 py-2 rounded-xl bg-gradient-to-r from-blue-50 to-white border border-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm">
-                        </div>
-                    </div>
-                </div>
-                <button id="btnFirebase" onclick="connectFirebase()" class="w-full mt-6 py-2.5 bg-slate-500 hover:bg-slate-600 text-white font-medium rounded-xl transition duration-300 shadow-md">
-                    Connect to Firebase
-                </button>
-            </div>
-
-            <div class="glass-card p-6 flex flex-col justify-between">
-                <div>
-                    <h2 class="text-lg font-semibold text-slate-700 mb-2">Microbit Bluetooth</h2>
-                    <p class="text-xs text-pink-400 mb-6">Make sure your Microbit is turned on and the Bluetooth UART extension is active in MakeCode.</p>
-                </div>
-                <div class="space-y-3">
-                    <button id="btnConnectMicrobit" onclick="connectMicrobit(true)" class="w-full py-3 bg-pink-200 hover:bg-pink-300 text-pink-700 font-semibold rounded-2xl transition duration-300">
-                        Connect Microbit
-                    </button>
-                    <button id="btnDisconnectMicrobit" onclick="connectMicrobit(false)" class="w-full py-3 bg-pink-300 text-pink-800 font-semibold rounded-2xl transition duration-300">
-                        Disconnect
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="flex items-center space-x-2 px-2">
-            <span class="inline-block w-2 h-2 rounded-full bg-pink-500 animate-pulse"></span>
-            <span class="text-xs font-bold text-pink-500 uppercase tracking-wider">Live sensor data</span>
-            <div class="h-[2px] flex-1 bg-gradient-to-r from-pink-300 to-transparent"></div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="glass-card p-6 flex flex-col justify-between min-h-[160px]">
-                <div class="flex items-center space-x-2">
-                    <span class="text-blue-400 text-xl">🌐</span>
-                    <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Ultrasonic Sensor</h2>
-                </div>
-                <div class="my-4">
-                    <div id="ultrasonicDisplay" class="text-3xl font-light text-slate-400">
-                        -- <span class="text-lg font-normal text-slate-400">cm</span>
-                    </div>
-                </div>
-                <div class="text-[11px] text-slate-400 border-t border-slate-100 pt-2">
-                    Distance tracking status
-                </div>
-            </div>
-
-            <div id="relayCard" class="glass-card p-6 flex flex-col justify-between min-h-[160px] transition duration-300">
-                <div class="flex justify-between items-start">
-                    <h2 class="text-xs font-bold text-purple-400 bg-purple-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Relay</h2>
-                    <span id="relayIcon" class="text-3xl text-slate-300 transition duration-300">⚡</span>
-                </div>
-                <div class="text-[11px] text-slate-400">
-                    Switch to control power and voltage status
-                </div>
-            </div>
-        </div>
-
-        <div class="glass-card p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <h2 class="text-md font-bold text-slate-700 tracking-wide">Manual Control</h2>
-            <div class="flex space-x-3 w-full sm:w-auto">
-                <button id="btnOn" onclick="toggleManual(true)" class="flex-1 sm:flex-initial px-8 py-2.5 bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold rounded-xl transition duration-300">
-                    ON
-                </button>
-                <button id="btnOff" onclick="toggleManual(false)" class="flex-1 sm:flex-initial px-8 py-2.5 bg-pink-50 text-pink-600 hover:bg-pink-100 font-semibold rounded-xl transition duration-300">
-                    OFF
-                </button>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-            <div id="ledCard" class="glass-card p-6 flex flex-col justify-between min-h-[150px] transition duration-300">
-                <span class="text-xs font-bold text-blue-500 bg-blue-50 px-2.5 py-1 rounded-full uppercase tracking-wider w-max">LED</span>
-                <div class="flex justify-center my-2">
-                    <svg id="ledIcon" class="w-12 h-12 text-slate-300 transition duration-300" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2c-3.86 0-7 3.14-7 7 0 2.89 1.76 5.37 4.29 6.45v2.55h5.42v-2.55c2.53-1.08 4.29-3.56 4.29-6.45 0-3.86-3.14-7-7-7zm2.71 13.29l-.71.3V17h-4v-1.41l-.71-.3A4.987 4.987 0 017 11h10c0 1.63-.79 3.12-2.29 4.29zM9 20h6v1H9z"/>
-                    </svg>
-                </div>
-                <div></div>
-            </div>
-            
-            <div class="hidden md:flex justify-around items-center opacity-70">
-                <span class="text-4xl animate-bounce" style="animation-delay: 0.1s">🛸</span>
-                <span class="text-4xl animate-bounce" style="animation-delay: 0.3s">🤖</span>
-                <span class="text-4xl animate-bounce" style="animation-delay: 0.5s">🚀</span>
-            </div>
-        </div>
-
-        <div class="glass-card p-6">
-            <div class="flex items-center space-x-1.5 mb-3">
-                <span class="w-3 h-3 rounded-full bg-pink-400"></span>
-                <span class="w-3 h-3 rounded-full bg-pink-400"></span>
-                <span class="w-3 h-3 rounded-full bg-blue-400"></span>
-                <span class="text-xs font-mono text-slate-400 ml-2">system_terminal:~supertripro</span>
-            </div>
-            <div id="terminalLog" class="w-full h-32 bg-[#E6DBED] rounded-xl p-3 font-mono text-xs text-purple-900 overflow-y-auto space-y-1">
-                <div>[SYSTEM] Terminal ready. Awaiting connection inputs...</div>
-            </div>
-        </div>
-
-    </div>
-
-    <script>
-        // State variables to track connections
-        let isFirebaseConnected = false;
-        let isMicrobitConnected = false;
-        let sensorInterval = null;
-
-        // Element Selectors
-        const logContainer = document.getElementById('terminalLog');
-        const ultrasonicDisplay = document.getElementById('ultrasonicDisplay');
-        const relayCard = document.getElementById('relayCard');
-        const relayIcon = document.getElementById('relayIcon');
-        const ledCard = document.getElementById('ledCard');
-        const ledIcon = document.getElementById('ledIcon');
-
-        // Helper function to write logs inside the terminal box
-        function writeLog(message, type = 'INFO') {
-            const timestamp = new Date().toLocaleTimeString();
-            const logLine = document.createElement('div');
-            
-            if (type === 'ERROR') {
-                logLine.className = 'text-red-600 font-semibold';
-            } else if (type === 'SUCCESS') {
-                logLine.className = 'text-green-700 font-semibold';
-            } else {
-                logLine.className = 'text-purple-900';
-            }
-            
-            logLine.innerHTML = `[${timestamp}] [${type}] ${message}`;
-            logContainer.appendChild(logLine);
-            logContainer.scrollTop = logContainer.scrollHeight; // Auto scroll to bottom
-        }
-
-        // --- FIREBASE LOGIC ---
-        function connectFirebase() {
-            const apiKey = document.getElementById('apiKey').value.trim();
-            const dbUrl = document.getElementById('dbUrl').value.trim();
-            const nodePath = document.getElementById('nodePath').value.trim();
-            const btn = document.getElementById('btnFirebase');
-
-            if (!apiKey || !dbUrl || !nodePath) {
-                writeLog('Failed to connect: Please fill in API Key, Database URL, and Node Path.', 'ERROR');
-                return;
-            }
-
-            // Simulate Successful Firebase Connection
-            isFirebaseConnected = true;
-            writeLog(`Successfully connected to Firebase at path: /${nodePath}`, 'SUCCESS');
-            
-            // UI state change for connection button
-            btn.innerText = 'Connected to Firebase';
-            btn.className = 'w-full mt-6 py-2.5 bg-blue-600 text-white font-medium rounded-xl transition duration-300 shadow-md';
-
-            checkSensorDataActivation();
-        }
-
-        // --- MICROBIT BLUETOOTH LOGIC ---
-        function connectMicrobit(status) {
-            const btnConnect = document.getElementById('btnConnectMicrobit');
-            const btnDisconnect = document.getElementById('btnDisconnectMicrobit');
-
-            if (status === true) {
-                // Connect clicked
-                isMicrobitConnected = true;
-                writeLog('Microbit successfully paired via Bluetooth!', 'SUCCESS');
-                
-                // Make "Connect Microbit" button color darker/stronger
-                btnConnect.className = "w-full py-3 bg-pink-500 text-white font-bold rounded-2xl shadow-md transition duration-300";
-                // Reset disconnect button to soft transparent style
-                btnDisconnect.className = "w-full py-3 bg-pink-100 text-pink-400 font-semibold rounded-2xl transition duration-300";
-            } else {
-                // Disconnect clicked
-                isMicrobitConnected = false;
-                writeLog('Microbit disconnected by user.', 'INFO');
-                
-                // Reset connection button to soft pink
-                btnConnect.className = "w-full py-3 bg-pink-200 text-pink-700 font-semibold rounded-2xl transition duration-300";
-                // Make "Disconnect" button color darker/stronger
-                btnDisconnect.className = "w-full py-3 bg-pink-400 text-white font-bold rounded-2xl shadow-md transition duration-300";
-            }
-
-            checkSensorDataActivation();
-        }
-
-        // --- ULTRASONIC SENSOR ACTIVATION CHECK ---
-        function checkSensorDataActivation() {
-            // Numbers will only appear if BOTH Microbit and Firebase are connected
-            if (isFirebaseConnected && isMicrobitConnected) {
-                if (!sensorInterval) {
-                    writeLog('All systems active. Streaming live Ultrasonic data streams...', 'INFO');
-                    // Simulating incoming live stream numbers
-                    sensorInterval = setInterval(() => {
-                        const randomDistance = Math.floor(Math.random() * 100) + 5; // values between 5cm and 105cm
-                        ultrasonicDisplay.innerHTML = `${randomDistance} <span class="text-lg font-normal text-slate-600">cm</span>`;
-                        ultrasonicDisplay.className = "text-4xl font-bold text-slate-800 transition duration-150";
-                    }, 1000);
-                }
-            } else {
-                // If either is missing, disable/hide the active distance numbers
-                if (sensorInterval) {
-                    clearInterval(sensorInterval);
-                    sensorInterval = null;
-                }
-                ultrasonicDisplay.innerHTML = `-- <span class="text-lg font-normal text-slate-400">cm</span>`;
-                ultrasonicDisplay.className = "text-3xl font-light text-slate-400";
-            }
-        }
-
-        // --- MANUAL CONTROL LOGIC (RELAY & LED) ---
-        function toggleManual(turnOn) {
-            const btnOn = document.getElementById('btnOn');
-            const btnOff = document.getElementById('btnOff');
-
-            if (turnOn) {
-                writeLog('Manual Control: Command ON sent. Turning Relay and LED on.', 'INFO');
-                
-                // Button UI updates
-                btnOn.className = "flex-1 sm:flex-initial px-8 py-2.5 bg-blue-500 text-white font-bold rounded-xl shadow-md transition duration-300";
-                btnOff.className = "flex-1 sm:flex-initial px-8 py-2.5 bg-pink-50 text-pink-600 font-semibold rounded-xl transition duration-300";
-
-                // Turn on Relay UI
-                relayCard.className = "glass-card p-6 flex flex-col justify-between min-h-[160px] bg-purple-100 border border-purple-300 shadow-sm transition duration-300";
-                relayIcon.className = "text-3xl text-purple-600 transition duration-300 scale-110 drop-shadow";
-
-                // Turn on LED UI
-                ledCard.className = "glass-card p-6 flex flex-col justify-between min-h-[150px] bg-blue-100 border border-blue-300 shadow-sm transition duration-300";
-                ledIcon.className = "w-12 h-12 text-blue-500 transition duration-300 scale-110 filter drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]";
-            } else {
-                writeLog('Manual Control: Command OFF sent. Turning Relay and LED off.', 'INFO');
-
-                // Button UI updates
-                btnOn.className = "flex-1 sm:flex-initial px-8 py-2.5 bg-blue-50 text-blue-600 font-semibold rounded-xl transition duration-300";
-                btnOff.className = "flex-1 sm:flex-initial px-8 py-2.5 bg-pink-500 text-white font-bold rounded-xl shadow-md transition duration-300";
-
-                // Turn off Relay UI
-                relayCard.className = "glass-card p-6 flex flex-col justify-between min-h-[160px] transition duration-300";
-                relayIcon.className = "text-3xl text-slate-300 transition duration-300 scale-100";
-
-                // Turn off LED UI
-                ledCard.className = "glass-card p-6 flex flex-col justify-between min-h-[150px] transition duration-300";
-                ledIcon.className = "w-12 h-12 text-slate-300 transition duration-300 scale-100";
+    <link rel="stylesheet" href="style.css">
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+                "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
             }
         }
     </script>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <header class="header-section">
+            <div class="top-robots">
+                <img src="assets/robot-blue.png" alt="Blue Robot" class="robot-top-left">
+                <img src="assets/robot-purple.png" alt="Purple Robot" class="robot-top-right">
+            </div>
+            
+            <img src="assets/super-tripro-logo.png" alt="SUPER TRIPRO" class="main-logo">
+            
+            <div class="bottom-illustrations">
+                <img src="assets/robot-pink.png" alt="Pink Robot" class="robot-mid-left">
+                <img src="assets/tower.png" alt="Tower" class="tower-right">
+            </div>
+        </header>
+
+        <div class="grid-2-col">
+            <section class="card firebase-card">
+                <h2>Firebase Cloud Sync</h2>
+                <div class="input-group">
+                    <label>API KEY</label>
+                    <input type="text" id="api-key" placeholder="Enter API Key...">
+                </div>
+                <div class="input-group">
+                    <label>DATABASE URL</label>
+                    <input type="text" id="db-url" placeholder="Enter Database URL...">
+                </div>
+                <div class="input-group">
+                    <label>NODE PATH</label>
+                    <input type="text" id="node-path" placeholder="Enter Node Path...">
+                </div>
+                <button id="btn-firebase-connect" class="btn-primary">Connect to Firebase</button>
+            </section>
+
+            <section class="card bluetooth-card">
+                <h2>Microbit Bluetooth</h2>
+                <p class="instruction">Make sure Microbit is powered on and Bluetooth UART extension is active in makecode</p>
+                <button id="btn-microbit-connect" class="btn-bluetooth">Connect Microbit</button>
+                <button id="btn-microbit-disconnect" class="btn-bluetooth active-disconnect">Disconnect</button>
+            </section>
+        </div>
+
+        <div class="divider-container">
+            <span class="live-icon">((•))</span>
+            <span class="divider-text">Live sensor data</span>
+            <div class="divider-line"></div>
+        </div>
+
+        <div class="grid-2-col">
+            <section class="card sensor-card">
+                <div class="card-title-with-icon">
+                    <span class="icon-placeholder">🌐</span>
+                    <h2>Ultrasonic sensor</h2>
+                </div>
+                <div class="sensor-display">
+                    <span id="ultrasonic-value">--</span> <span class="unit">cm</span>
+                </div>
+                <p class="sensor-sub">Distance data</p>
+            </section>
+
+            <section class="card relay-card">
+                <span class="badge yellow-badge">Relay</span>
+                <div class="relay-icon-container">
+                    <svg id="relay-icon" class="status-icon icon-off" viewBox="0 0 24 24" width="80" height="80">
+                        <path fill="currentColor" d="M11.5 20l1.5-6H9l4.5-8v6H15l-4.5 8z"/>
+                    </svg>
+                </div>
+            </section>
+        </div>
+
+        <section class="card manual-control-card">
+            <span class="control-label">Manual Control</span>
+            <div class="control-buttons">
+                <button id="btn-control-on" class="btn-toggle">ON</button>
+                <button id="btn-control-off" class="btn-toggle active-off">OFF</button>
+            </div>
+        </section>
+
+        <div class="grid-2-col-spec">
+            <section class="card led-card">
+                <span class="badge blue-badge">LED</span>
+                <div class="led-icon-container">
+                    <svg id="led-icon" class="status-icon icon-off" viewBox="0 0 24 24" width="80" height="80">
+                        <path fill="currentColor" d="M12 2A7 7 0 0 0 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1z"/>
+                    </svg>
+                </div>
+            </section>
+            
+            <div class="robots-group-illustration">
+                <img src="assets/robot-pink.png" alt="Pink Robot Group" class="group-pink">
+                <img src="assets/robot-purple.png" alt="Purple Robot Group" class="group-purple">
+                <img src="assets/robot-blue.png" alt="Blue Robot Group" class="group-blue">
+            </div>
+        </div>
+
+        <footer class="terminal-card">
+            <div class="terminal-header">
+                <span class="dot red"></span>
+                <span class="dot pink"></span>
+                <span class="dot blue"></span>
+                <span class="terminal-title">system_terminal:~supertripro</span>
+            </div>
+            <div id="terminal-log" class="terminal-body">
+                [SYSTEM] Welcome to Super Tripro Dashboard. Waiting for connections...
+            </div>
+        </footer>
+
+    </div>
+
+    <script type="module" src="app.js"></script>
 </body>
 </html>
