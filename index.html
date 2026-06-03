@@ -50,7 +50,7 @@
         .terminal-font {
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace !important;
         }
-        .relay-on { box-shadow: 0 0 25px 5px rgba(168,85,247,0.4) !important; }
+        .relay-on { box-shadow: 0 0 25px 5px rgba(168,85,247,0.3) !important; }
     </style>
 </head>
 <body class="font-balsamiq text-gray-600 min-h-screen relative overflow-x-hidden pb-12">
@@ -61,7 +61,7 @@
     <div class="absolute bottom-2 left-16 md:left-40 text-5xl floating-delay-2">🛸</div>
     
     <div class="container mx-auto px-4 text-center relative z-10 flex flex-col items-center">
-        <h1 class="text-5xl md:text-6xl font-extrabold tracking-wider text-[#f59e0b] drop-shadow-[0_4px_0_rgba(180,83,9,1)] italic italic uppercase mb-2">
+        <h1 class="text-5xl md:text-6xl font-extrabold tracking-wider text-[#f59e0b] drop-shadow-[0_4px_0_rgba(180,83,9,1)] italic uppercase mb-2">
             SUPER TRIPRO
         </h1>
         <div class="w-24 h-1 bg-[#f59e0b] rounded-full shadow-sm"></div>
@@ -99,10 +99,6 @@
                 <p class="text-xs text-pink-400 font-medium mb-4">
                     Pastikan Microbit menyala dan ekstensi Bluetooth UART aktif di makecode
                 </p>
-                
-                <div class="hidden">
-                    mode: 1=auto · 0=manual | relay: 1=on · 0=off
-                </div>
             </div>
             
             <div class="space-y-3 w-full">
@@ -126,53 +122,52 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
         <div class="space-y-6 flex flex-col justify-between">
-            <div class="bg-white rounded-[2rem] p-6 shadow-md border border-white/60 flex flex-col justify-between h-full">
-                <div class="flex items-center gap-2 mb-4">
+            <div class="bg-white rounded-[2rem] p-6 shadow-md border border-white/60 flex flex-col justify-between h-1/2 min-h-[160px]">
+                <div class="flex items-center gap-2 mb-2">
                     <i class="ph-bold ph-cube text-[#4a90e2] text-xl"></i>
-                    <h3 class="text-sm font-bold text-gray-700 tracking-wide">Ultrasonic sensor (Main)</h3>
+                    <h3 class="text-sm font-bold text-gray-700 tracking-wide">Ultrasonic sensor</h3>
                 </div>
-                <div class="flex items-center gap-3 my-4">
-                    <div class="bg-gray-50 border border-gray-100 text-gray-700 text-2xl font-bold py-2 px-4 rounded-xl min-w-[80px] text-center shadow-inner">
+                <div class="flex items-center gap-3 my-2">
+                    <div class="bg-gray-50 border border-gray-100 text-gray-700 text-2xl font-bold py-1.5 px-4 rounded-xl min-w-[80px] text-center shadow-inner">
                         <span id="val-ultra1">--</span>
                     </div>
                     <span class="text-gray-400 text-sm font-bold">cm</span>
                 </div>
                 <div class="w-full">
                     <input type="range" id="range-ultra1" min="0" max="100" value="0" class="w-full" disabled>
-                    <p class="text-[11px] text-gray-400 mt-2 font-medium">Mendeteksi pergerakan / jarak tanaman</p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-white rounded-[2rem] p-4 shadow-md border border-white/60 text-center">
-                    <h4 class="text-xs font-bold text-gray-400 mb-2">Bucket Level</h4>
-                    <span id="val-ultra2" class="text-xl font-bold text-gray-700">--</span> <span class="text-xs text-gray-400">cm</span>
-                    <input type="range" id="range-ultra2" min="0" max="100" value="0" class="w-full mt-2" disabled>
+            <div class="bg-white rounded-[2rem] p-6 shadow-md border border-white/60 flex flex-col justify-between h-1/2 min-h-[160px]">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="bg-[#e3f2fd] text-[#1e88e5] text-xs font-bold px-4 py-1 rounded-full tracking-wide shadow-sm">LED</span>
                 </div>
-                <div class="bg-white rounded-[2rem] p-4 shadow-md border border-white/60 text-center flex flex-col justify-center items-center">
-                    <h4 class="text-xs font-bold text-gray-400 mb-1">Room Temp</h4>
-                    <div class="flex items-center gap-1">
-                        <span id="val-suhu" class="text-xl font-bold text-gray-700">--</span>
-                        <span class="text-xs font-bold text-gray-400">°C</span>
-                    </div>
-                    <i class="ph-bold ph-thermometer text-orange-400 text-lg mt-1"></i>
+                <div class="flex items-center justify-center flex-1 my-2">
+                    <i id="led-icon" class="ph-bold ph-lightbulb text-gray-300 text-5xl transition-all duration-300"></i>
                 </div>
+                <div class="text-center text-[11px] font-bold text-gray-400 tracking-wider">STATUS MONITOR</div>
             </div>
         </div>
 
-        <div id="relay-blob" class="bg-white rounded-[2rem] p-6 shadow-md border border-white/60 flex flex-col items-center justify-between min-h-[250px] transition-all duration-300">
+        <div id="relay-blob" class="bg-white rounded-[2rem] p-6 shadow-md border border-white/60 flex flex-col items-center justify-between min-h-[340px] transition-all duration-300">
             <div class="w-full flex justify-between items-center">
                 <span class="bg-[#ebd9fc] text-[#9333ea] text-xs font-bold px-4 py-1.5 rounded-full tracking-wide shadow-sm">Relay</span>
-                <span class="text-[10px] text-gray-400 font-bold tracking-wider">PIN P13</span>
             </div>
             
-            <div class="my-6">
+            <div class="my-4">
                 <i id="relay-icon" class="ph-fill ph-lightning text-[#d8b4fe] text-7xl filter drop-shadow-sm transition-transform duration-300"></i>
             </div>
             
-            <p class="text-[11px] text-gray-400 text-center px-4 font-medium">
-                Koneksi untuk mengontrol nyala dan matinya pompa
-            </p>
+            <div class="w-full space-y-2.5 pt-2">
+                <button id="btn-relay-on" onclick="setRelayDirect(true)" disabled
+                    class="w-full bg-gray-100 text-gray-400 font-bold py-2.5 rounded-xl shadow-sm transition text-xs tracking-wider uppercase disabled:opacity-40">
+                    ON
+                </button>
+                <button id="btn-relay-off" onclick="setRelayDirect(false)" disabled
+                    class="w-full bg-gray-100 text-gray-400 font-bold py-2.5 rounded-xl shadow-sm transition text-xs tracking-wider uppercase disabled:opacity-40">
+                    OFF
+                </button>
+            </div>
         </div>
 
     </div>
@@ -180,7 +175,7 @@
     <div class="bg-white rounded-[2rem] p-6 shadow-md border border-white/60 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="text-center sm:text-left">
             <h3 class="text-sm font-bold text-gray-700 tracking-wide mb-1">Manual Control Mode</h3>
-            <p class="text-xs text-gray-400 font-medium">Pilih otomatis sensor atau kendali saklar penuh di bawah.</p>
+            <p class="text-xs text-gray-400 font-medium">Pilih otomatis sensor atau kendali saklar penuh di kanan.</p>
         </div>
         
         <div class="flex bg-gray-100 p-1.5 rounded-2xl border border-gray-200/60 w-full sm:w-auto">
@@ -193,22 +188,13 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-[2rem] p-6 shadow-md border border-white/60 flex flex-col items-center justify-center gap-3">
-        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Toggle Pompa (Mode Manual)</span>
-        <button id="btn-relay" onclick="toggleRelay()" disabled
-            class="w-full max-w-xs bg-gray-200 text-gray-400 font-bold py-3 rounded-2xl shadow-sm transition text-sm tracking-wider uppercase disabled:opacity-50">
-            OFF
-        </button>
-    </div>
-
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 opacity-40 hover:opacity-100 transition-opacity">
-        <div class="bg-white/80 rounded-2xl p-4 shadow-sm h-40 flex flex-col">
+        <div class="bg-white/80 rounded-2xl p-4 shadow-sm h-36 flex flex-col">
             <span class="text-[11px] font-bold text-gray-400 mb-2">Chart Distance</span>
             <div class="flex-1 min-h-0"><canvas id="chart-jarak"></canvas></div>
         </div>
-        <div class="bg-white/80 rounded-2xl p-4 shadow-sm h-40 flex flex-col">
-            <span class="text-[11px] font-bold text-gray-400 mb-2">Chart Bucket Level</span>
-            <div class="flex-1 min-h-0"><canvas id="chart-jarak-manual"></canvas></div>
+        <div class="bg-white/80 rounded-2xl p-4 shadow-sm h-36 flex flex-col hidden">
+            <canvas id="chart-jarak-manual"></canvas>
         </div>
     </div>
 
@@ -320,12 +306,9 @@ function handleIncoming(key, val) {
             pushHistory('jarak', val);
             break;
         case 'jarak_manual':
-            $('val-ultra2').textContent = val;
-            $('range-ultra2').value = Math.min(parseFloat(val) || 0, 100);
             pushHistory('jarak_manual', val);
             break;
         case 'suhu':
-            $('val-suhu').textContent = val;
             break;
         case 'Relay':
             applyRelayUI(val.trim() === '1');
@@ -353,42 +336,55 @@ function applyModeUI(mode) {
     const inactive = 'text-gray-400 font-bold py-2.5 px-5 rounded-xl hover:bg-gray-200 transition text-xs';
     $('btn-auto').className   = isAuto  ? active : inactive;
     $('btn-manual').className = !isAuto ? active : inactive;
-    $('btn-relay').disabled = isAuto;
+    
+    // Status tombol Relay didalam panel kontrol manual
+    $('btn-relay-on').disabled = isAuto;
+    $('btn-relay-off').disabled = isAuto;
     log(`mode ui update → ${mode}`, '#7e22ce');
 }
 
-window.toggleRelay = function() {
+// Fungsi tombol ON dan OFF terpisah didalam card Relay
+window.setRelayDirect = function(shouldOn) {
     if (S.mode === 'auto') {
         log('cannot control relay in auto mode.', '#dc2626');
         return;
     }
-    const next = !S.relay;
-    sendBLE('Relay', next ? 1 : 0);
-    log(`relay command → ${next ? 'on' : 'off'} (sent: Relay,${next ? 1 : 0})`, '#b45309');
-    applyRelayUI(next);
-    if (S.db) update(ref(S.db, `${S.fbPath}/Relay`), { value: next ? 1 : 0 }).catch(() => {});
+    sendBLE('Relay', shouldOn ? 1 : 0);
+    log(`relay command → ${shouldOn ? 'on' : 'off'} (sent: Relay,${shouldOn ? 1 : 0})`, '#b45309');
+    applyRelayUI(shouldOn);
+    if (S.db) update(ref(S.db, `${S.fbPath}/Relay`), { value: shouldOn ? 1 : 0 }).catch(() => {});
 };
 
 function applyRelayUI(isOn) {
     S.relay = isOn;
-    const btn  = $('btn-relay');
     const icon = $('relay-icon');
     const blob = $('relay-blob');
+    const led  = $('led-icon');
+    const btnOn  = $('btn-relay-on');
+    const btnOff = $('btn-relay-off');
 
     if (isOn) {
-        btn.textContent = 'ON';
-        btn.classList.remove('bg-gray-200', 'text-gray-400');
-        btn.classList.add('bg-emerald-400', 'text-white');
+        btnOn.className = "w-full bg-emerald-400 text-white font-bold py-2.5 rounded-xl shadow-sm transition text-xs tracking-wider uppercase";
+        btnOff.className = "w-full bg-gray-100 text-gray-400 font-bold py-2.5 rounded-xl shadow-sm transition text-xs tracking-wider uppercase";
+        
         icon.classList.remove('text-[#d8b4fe]');
         icon.classList.add('text-purple-600', 'animate-pulse');
         blob.classList.add('relay-on');
+        
+        // Perubahan komponen indikator LED
+        led.classList.remove('text-gray-300');
+        led.classList.add('text-yellow-400', 'drop-shadow-[0_0_10px_rgba(250,204,21,0.6)]');
     } else {
-        btn.textContent = 'OFF';
-        btn.classList.remove('bg-emerald-400', 'text-white');
-        btn.classList.add('bg-gray-200', 'text-gray-400');
+        btnOn.className = "w-full bg-gray-100 text-gray-400 font-bold py-2.5 rounded-xl shadow-sm transition text-xs tracking-wider uppercase";
+        btnOff.className = "w-full bg-rose-400 text-white font-bold py-2.5 rounded-xl shadow-sm transition text-xs tracking-wider uppercase";
+        
         icon.classList.remove('text-purple-600', 'animate-pulse');
         icon.classList.add('text-[#d8b4fe]');
         blob.classList.remove('relay-on');
+        
+        // Perubahan komponen indikator LED
+        led.classList.remove('text-yellow-400', 'drop-shadow-[0_0_10px_rgba(250,204,21,0.6)]');
+        led.classList.add('text-gray-300');
     }
 }
 
