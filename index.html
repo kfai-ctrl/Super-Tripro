@@ -3,127 +3,486 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Tripro Dashboard</title>
-    <link rel="stylesheet" href="style.css">
-    <script type="importmap">
-        {
-            "imports": {
-                "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
-                "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+    <title>Super Tripro - Smart Garden Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 'balsamiq': ['"Balsamiq Sans"', 'cursive'] },
+                    colors: {
+                        'st-purple': '#cbb6de',
+                        'st-blue-light': '#e3f2fd',
+                        'st-pink-light': '#fce4ec',
+                        'st-btn-blue': '#4a90e2',
+                    }
+                }
             }
         }
     </script>
+
+    <style>
+        body {
+            background: linear-gradient(180deg, #d2e7f7 0%, #fbcfe8 50%, #fef08a 100%);
+            font-family: 'Balsamiq Sans', cursive;
+        }
+        .floating         { animation: floating 3s   ease-in-out infinite; }
+        .floating-delay-1 { animation: floating 3.5s ease-in-out infinite 0.5s; }
+        .floating-delay-2 { animation: floating 4s   ease-in-out infinite 1s; }
+        @keyframes floating {
+            0%   { transform: translateY(0px)   rotate(0deg); }
+            50%  { transform: translateY(-15px) rotate(3deg); }
+            100% { transform: translateY(0px)   rotate(0deg); }
+        }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+            background: #4a90e2; cursor: pointer; margin-top: -5px; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 6px; cursor: pointer;
+            background: rgba(0,0,0,.05); border-radius: 10px;
+        }
+        .terminal-font {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace !important;
+        }
+        .relay-on { box-shadow: 0 0 25px 5px rgba(168,85,247,0.4) !important; }
+    </style>
 </head>
-<body>
+<body class="font-balsamiq text-gray-600 min-h-screen relative overflow-x-hidden pb-12">
 
-    <div class="dashboard-container">
-        <header class="header-section">
-            <div class="top-robots">
-                <img src="assets/robot-blue.png" alt="Blue Robot" class="robot-top-left">
-                <img src="assets/robot-purple.png" alt="Purple Robot" class="robot-top-right">
+<header class="py-12 relative flex flex-col items-center justify-center">
+    <div class="absolute top-6 left-10 md:left-24 text-6xl floating">🤖</div>
+    <div class="absolute top-24 right-10 md:right-24 text-6xl floating-delay-1">🚀</div>
+    <div class="absolute bottom-2 left-16 md:left-40 text-5xl floating-delay-2">🛸</div>
+    
+    <div class="container mx-auto px-4 text-center relative z-10 flex flex-col items-center">
+        <h1 class="text-5xl md:text-6xl font-extrabold tracking-wider text-[#f59e0b] drop-shadow-[0_4px_0_rgba(180,83,9,1)] italic italic uppercase mb-2">
+            SUPER TRIPRO
+        </h1>
+        <div class="w-24 h-1 bg-[#f59e0b] rounded-full shadow-sm"></div>
+    </div>
+</header>
+
+<main class="container mx-auto px-4 max-w-4xl mt-4 space-y-8">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div class="bg-white rounded-[2rem] p-6 shadow-md border border-white/60">
+            <h2 class="text-lg font-bold text-gray-700 mb-4 tracking-wide">Firebase Cloud Sync</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1 ml-1">API KEY</label>
+                    <input type="text" id="fb-apiKey" class="w-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none focus:bg-white transition text-sm shadow-inner" placeholder="Enter API Key...">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1 ml-1">DATABASE URL</label>
+                    <input type="text" id="fb-dbUrl" class="w-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none focus:bg-white transition text-sm shadow-inner" placeholder="Enter Database URL...">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1 ml-1">NODE PATH</label>
+                    <input type="text" id="fb-path" class="w-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-gray-100 rounded-xl px-4 py-2.5 outline-none focus:bg-white transition text-sm shadow-inner" placeholder="e.g. garden/kebun1">
+                </div>
+                <button id="btn-connect-fb" class="w-full mt-2 bg-[#6b82a6] hover:bg-[#576b8a] text-white font-bold py-2.5 rounded-xl shadow-sm transition text-sm tracking-wider">
+                    Connect to Firebase
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-[2rem] p-6 shadow-md border border-white/60 flex flex-col justify-between">
+            <div>
+                <h2 class="text-lg font-bold text-gray-700 mb-2 tracking-wide">Microbit Bluetooth</h2>
+                <p class="text-xs text-pink-400 font-medium mb-4">
+                    Pastikan Microbit menyala dan ekstensi Bluetooth UART aktif di makecode
+                </p>
+                
+                <div class="hidden">
+                    mode: 1=auto · 0=manual | relay: 1=on · 0=off
+                </div>
             </div>
             
-            <img src="assets/super-tripro-logo.png" alt="SUPER TRIPRO" class="main-logo">
+            <div class="space-y-3 w-full">
+                <button id="btn-connect-ble" class="w-full bg-[#fbcfe8] hover:bg-[#f4b5d6] text-pink-600 font-bold py-3 rounded-2xl shadow-sm transition text-sm">
+                    Connect Microbit
+                </button>
+                <button id="btn-disconnect-ble" class="w-full bg-red-100 text-red-500 font-bold py-3 rounded-2xl shadow-sm transition hover:bg-red-200 text-sm hidden">
+                    Disconnect
+                </button>
+                <div id="ble-status" class="text-center text-xs font-bold text-gray-400 tracking-wider">● Disconnected</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-3 pt-2">
+        <i class="ph-bold ph-broadcast text-pink-400 text-sm"></i>
+        <span class="text-xs font-bold text-pink-400 tracking-widest uppercase">Live sensor data</span>
+        <div class="flex-1 h-[2px] bg-pink-300/40 rounded-full"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div class="space-y-6 flex flex-col justify-between">
+            <div class="bg-white rounded-[2rem] p-6 shadow-md border border-white/60 flex flex-col justify-between h-full">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="ph-bold ph-cube text-[#4a90e2] text-xl"></i>
+                    <h3 class="text-sm font-bold text-gray-700 tracking-wide">Ultrasonic sensor (Main)</h3>
+                </div>
+                <div class="flex items-center gap-3 my-4">
+                    <div class="bg-gray-50 border border-gray-100 text-gray-700 text-2xl font-bold py-2 px-4 rounded-xl min-w-[80px] text-center shadow-inner">
+                        <span id="val-ultra1">--</span>
+                    </div>
+                    <span class="text-gray-400 text-sm font-bold">cm</span>
+                </div>
+                <div class="w-full">
+                    <input type="range" id="range-ultra1" min="0" max="100" value="0" class="w-full" disabled>
+                    <p class="text-[11px] text-gray-400 mt-2 font-medium">Mendeteksi pergerakan / jarak tanaman</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white rounded-[2rem] p-4 shadow-md border border-white/60 text-center">
+                    <h4 class="text-xs font-bold text-gray-400 mb-2">Bucket Level</h4>
+                    <span id="val-ultra2" class="text-xl font-bold text-gray-700">--</span> <span class="text-xs text-gray-400">cm</span>
+                    <input type="range" id="range-ultra2" min="0" max="100" value="0" class="w-full mt-2" disabled>
+                </div>
+                <div class="bg-white rounded-[2rem] p-4 shadow-md border border-white/60 text-center flex flex-col justify-center items-center">
+                    <h4 class="text-xs font-bold text-gray-400 mb-1">Room Temp</h4>
+                    <div class="flex items-center gap-1">
+                        <span id="val-suhu" class="text-xl font-bold text-gray-700">--</span>
+                        <span class="text-xs font-bold text-gray-400">°C</span>
+                    </div>
+                    <i class="ph-bold ph-thermometer text-orange-400 text-lg mt-1"></i>
+                </div>
+            </div>
+        </div>
+
+        <div id="relay-blob" class="bg-white rounded-[2rem] p-6 shadow-md border border-white/60 flex flex-col items-center justify-between min-h-[250px] transition-all duration-300">
+            <div class="w-full flex justify-between items-center">
+                <span class="bg-[#ebd9fc] text-[#9333ea] text-xs font-bold px-4 py-1.5 rounded-full tracking-wide shadow-sm">Relay</span>
+                <span class="text-[10px] text-gray-400 font-bold tracking-wider">PIN P13</span>
+            </div>
             
-            <div class="bottom-illustrations">
-                <img src="assets/robot-pink.png" alt="Pink Robot" class="robot-mid-left">
-                <img src="assets/tower.png" alt="Tower" class="tower-right">
+            <div class="my-6">
+                <i id="relay-icon" class="ph-fill ph-lightning text-[#d8b4fe] text-7xl filter drop-shadow-sm transition-transform duration-300"></i>
             </div>
-        </header>
-
-        <div class="grid-2-col">
-            <section class="card firebase-card">
-                <h2>Firebase Cloud Sync</h2>
-                <div class="input-group">
-                    <label>API KEY</label>
-                    <input type="text" id="api-key" placeholder="Enter API Key...">
-                </div>
-                <div class="input-group">
-                    <label>DATABASE URL</label>
-                    <input type="text" id="db-url" placeholder="Enter Database URL...">
-                </div>
-                <div class="input-group">
-                    <label>NODE PATH</label>
-                    <input type="text" id="node-path" placeholder="Enter Node Path...">
-                </div>
-                <button id="btn-firebase-connect" class="btn-primary">Connect to Firebase</button>
-            </section>
-
-            <section class="card bluetooth-card">
-                <h2>Microbit Bluetooth</h2>
-                <p class="instruction">Make sure Microbit is powered on and Bluetooth UART extension is active in makecode</p>
-                <button id="btn-microbit-connect" class="btn-bluetooth">Connect Microbit</button>
-                <button id="btn-microbit-disconnect" class="btn-bluetooth active-disconnect">Disconnect</button>
-            </section>
-        </div>
-
-        <div class="divider-container">
-            <span class="live-icon">((•))</span>
-            <span class="divider-text">Live sensor data</span>
-            <div class="divider-line"></div>
-        </div>
-
-        <div class="grid-2-col">
-            <section class="card sensor-card">
-                <div class="card-title-with-icon">
-                    <span class="icon-placeholder">🌐</span>
-                    <h2>Ultrasonic sensor</h2>
-                </div>
-                <div class="sensor-display">
-                    <span id="ultrasonic-value">--</span> <span class="unit">cm</span>
-                </div>
-                <p class="sensor-sub">Distance data</p>
-            </section>
-
-            <section class="card relay-card">
-                <span class="badge yellow-badge">Relay</span>
-                <div class="relay-icon-container">
-                    <svg id="relay-icon" class="status-icon icon-off" viewBox="0 0 24 24" width="80" height="80">
-                        <path fill="currentColor" d="M11.5 20l1.5-6H9l4.5-8v6H15l-4.5 8z"/>
-                    </svg>
-                </div>
-            </section>
-        </div>
-
-        <section class="card manual-control-card">
-            <span class="control-label">Manual Control</span>
-            <div class="control-buttons">
-                <button id="btn-control-on" class="btn-toggle">ON</button>
-                <button id="btn-control-off" class="btn-toggle active-off">OFF</button>
-            </div>
-        </section>
-
-        <div class="grid-2-col-spec">
-            <section class="card led-card">
-                <span class="badge blue-badge">LED</span>
-                <div class="led-icon-container">
-                    <svg id="led-icon" class="status-icon icon-off" viewBox="0 0 24 24" width="80" height="80">
-                        <path fill="currentColor" d="M12 2A7 7 0 0 0 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1z"/>
-                    </svg>
-                </div>
-            </section>
             
-            <div class="robots-group-illustration">
-                <img src="assets/robot-pink.png" alt="Pink Robot Group" class="group-pink">
-                <img src="assets/robot-purple.png" alt="Purple Robot Group" class="group-purple">
-                <img src="assets/robot-blue.png" alt="Blue Robot Group" class="group-blue">
-            </div>
+            <p class="text-[11px] text-gray-400 text-center px-4 font-medium">
+                Koneksi untuk mengontrol nyala dan matinya pompa
+            </p>
         </div>
-
-        <footer class="terminal-card">
-            <div class="terminal-header">
-                <span class="dot red"></span>
-                <span class="dot pink"></span>
-                <span class="dot blue"></span>
-                <span class="terminal-title">system_terminal:~supertripro</span>
-            </div>
-            <div id="terminal-log" class="terminal-body">
-                [SYSTEM] Welcome to Super Tripro Dashboard. Waiting for connections...
-            </div>
-        </footer>
 
     </div>
 
-    <script type="module" src="app.js"></script>
+    <div class="bg-white rounded-[2rem] p-6 shadow-md border border-white/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-center sm:text-left">
+            <h3 class="text-sm font-bold text-gray-700 tracking-wide mb-1">Manual Control Mode</h3>
+            <p class="text-xs text-gray-400 font-medium">Pilih otomatis sensor atau kendali saklar penuh di bawah.</p>
+        </div>
+        
+        <div class="flex bg-gray-100 p-1.5 rounded-2xl border border-gray-200/60 w-full sm:w-auto">
+            <button id="btn-auto" onclick="setMode('auto')" class="w-1/2 sm:w-auto text-xs font-bold py-2.5 px-5 rounded-xl transition shadow-none text-gray-400">
+                AUTOMATIC
+            </button>
+            <button id="btn-manual" onclick="setMode('manual')" class="w-1/2 sm:w-auto text-xs font-bold py-2.5 px-5 rounded-xl transition shadow-none text-gray-400">
+                MANUAL
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-[2rem] p-6 shadow-md border border-white/60 flex flex-col items-center justify-center gap-3">
+        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Toggle Pompa (Mode Manual)</span>
+        <button id="btn-relay" onclick="toggleRelay()" disabled
+            class="w-full max-w-xs bg-gray-200 text-gray-400 font-bold py-3 rounded-2xl shadow-sm transition text-sm tracking-wider uppercase disabled:opacity-50">
+            OFF
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 opacity-40 hover:opacity-100 transition-opacity">
+        <div class="bg-white/80 rounded-2xl p-4 shadow-sm h-40 flex flex-col">
+            <span class="text-[11px] font-bold text-gray-400 mb-2">Chart Distance</span>
+            <div class="flex-1 min-h-0"><canvas id="chart-jarak"></canvas></div>
+        </div>
+        <div class="bg-white/80 rounded-2xl p-4 shadow-sm h-40 flex flex-col">
+            <span class="text-[11px] font-bold text-gray-400 mb-2">Chart Bucket Level</span>
+            <div class="flex-1 min-h-0"><canvas id="chart-jarak-manual"></canvas></div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-[2rem] p-6 shadow-md border border-white/60">
+        <div class="flex items-center justify-between mb-4 pb-2 border-b border-gray-100">
+            <div class="flex items-center gap-1.5">
+                <div class="w-2.5 h-2.5 rounded-full bg-pink-400"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-purple-400"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-blue-400"></div>
+                <span class="ml-2 terminal-font text-xs text-gray-400 font-bold tracking-wide">System_Terminal : supertripro</span>
+            </div>
+            <button id="btnClearLog" class="text-xs font-bold text-gray-400 hover:text-red-400 transition flex items-center gap-1">
+                <i class="ph-bold ph-trash"></i> Clear
+            </button>
+        </div>
+        <div id="terminal-content" class="terminal-font bg-[#ebd9fc]/40 rounded-2xl h-40 p-4 text-xs text-purple-700 overflow-y-auto space-y-1 shadow-inner">
+            <div class="opacity-60">System initiated successfully...</div>
+            <div class="opacity-60">Waiting for micro:bit communication signal...</div>
+        </div>
+    </div>
+
+</main>
+
+<script type="module">
+import { initializeApp, getApps, deleteApp }      from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getDatabase, ref, onValue, update, set } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js';
+
+const SVC = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+const TX  = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; 
+const RX  = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; 
+
+const S = {
+    device: null, rxChar: null, bleBuffer: '',
+    mode: 'auto',   
+    relay: false,
+    db: null, fbPath: '',
+    history: {
+        jarak:        { labels: [], data: [] },
+        jarak_manual: { labels: [], data: [] }
+    },
+    charts: {}
+};
+const MAX_PTS = 20;
+const $ = id => document.getElementById(id);
+
+function log(msg, color = '#7e22ce') {
+    const term = $('terminal-content');
+    const line = document.createElement('div');
+    line.className  = 'opacity-90 py-0.5 terminal-font';
+    line.style.color = color;
+    line.textContent = `[${new Date().toLocaleTimeString()}] > ${msg}`;
+    term.appendChild(line);
+    term.scrollTop = term.scrollHeight;
+}
+
+async function connectBLE() {
+    try {
+        log('searching for micro:bit...', '#b45309');
+        S.device = await navigator.bluetooth.requestDevice({
+            filters: [{ namePrefix: 'BBC micro:bit' }],
+            optionalServices: [SVC]
+        });
+        S.device.addEventListener('gattserverdisconnected', onBLEDisconnect);
+        const server  = await S.device.gatt.connect();
+        const service = await server.getPrimaryService(SVC);
+        S.rxChar      = await service.getCharacteristic(RX);
+        const txChar  = await service.getCharacteristic(TX);
+        await txChar.startNotifications();
+        txChar.addEventListener('characteristicvaluechanged', onBLEData);
+        setBLEStatus(true);
+        log(`connected: ${S.device.name} ✅`, '#2563eb');
+    } catch (e) {
+        log('connection failed: ' + e.message.toLowerCase(), '#dc2626');
+    }
+}
+
+function onBLEDisconnect() {
+    setBLEStatus(false);
+    log('bluetooth connection lost.', '#dc2626');
+}
+
+function setBLEStatus(ok) {
+    $('btn-connect-ble').classList.toggle('hidden', ok);
+    $('btn-disconnect-ble').classList.toggle('hidden', !ok);
+    $('ble-status').textContent = ok ? '● Connected' : '● Disconnected';
+    $('ble-status').style.color = ok ? '#16a34a' : '#aaa';
+}
+
+function onBLEData(e) {
+    S.bleBuffer += new TextDecoder().decode(e.target.value);
+    const lines = S.bleBuffer.split('\n');
+    S.bleBuffer = lines.pop() ?? '';
+    lines.forEach(line => {
+        line = line.trim();
+        if (!line || !line.includes(':')) return;
+        const idx = line.indexOf(':');
+        const key = line.substring(0, idx).trim();
+        const val = line.substring(idx + 1).trim();
+        log(`rx ← ${key}:${val}`, '#2563eb');
+        handleIncoming(key, val);
+    });
+}
+
+function handleIncoming(key, val) {
+    switch (key) {
+        case 'jarak':
+            $('val-ultra1').textContent = val;
+            $('range-ultra1').value = Math.min(parseFloat(val) || 0, 100);
+            pushHistory('jarak', val);
+            break;
+        case 'jarak_manual':
+            $('val-ultra2').textContent = val;
+            $('range-ultra2').value = Math.min(parseFloat(val) || 0, 100);
+            pushHistory('jarak_manual', val);
+            break;
+        case 'suhu':
+            $('val-suhu').textContent = val;
+            break;
+        case 'Relay':
+            applyRelayUI(val.trim() === '1');
+            break;
+        case 'mode':
+            applyModeUI(val.trim() === '1' ? 'auto' : 'manual');
+            break;
+    }
+    if (S.db) {
+        update(ref(S.db, `${S.fbPath}/${key}`), { value: parseFloat(val) || 0 }).catch(() => {});
+    }
+}
+
+window.setMode = function(mode) {
+    sendBLE('mode', mode === 'auto' ? 1 : 0);
+    log(`mode command → ${mode} (sent: mode,${mode === 'auto' ? 1 : 0})`, '#b45309');
+    applyModeUI(mode);
+    if (S.db) update(ref(S.db, `${S.fbPath}/mode`), { value: mode === 'auto' ? 1 : 0 }).catch(() => {});
+};
+
+function applyModeUI(mode) {
+    S.mode = mode;
+    const isAuto  = mode === 'auto';
+    const active  = 'bg-[#4a90e2] text-white font-bold py-2.5 px-5 rounded-xl shadow-sm transition text-xs';
+    const inactive = 'text-gray-400 font-bold py-2.5 px-5 rounded-xl hover:bg-gray-200 transition text-xs';
+    $('btn-auto').className   = isAuto  ? active : inactive;
+    $('btn-manual').className = !isAuto ? active : inactive;
+    $('btn-relay').disabled = isAuto;
+    log(`mode ui update → ${mode}`, '#7e22ce');
+}
+
+window.toggleRelay = function() {
+    if (S.mode === 'auto') {
+        log('cannot control relay in auto mode.', '#dc2626');
+        return;
+    }
+    const next = !S.relay;
+    sendBLE('Relay', next ? 1 : 0);
+    log(`relay command → ${next ? 'on' : 'off'} (sent: Relay,${next ? 1 : 0})`, '#b45309');
+    applyRelayUI(next);
+    if (S.db) update(ref(S.db, `${S.fbPath}/Relay`), { value: next ? 1 : 0 }).catch(() => {});
+};
+
+function applyRelayUI(isOn) {
+    S.relay = isOn;
+    const btn  = $('btn-relay');
+    const icon = $('relay-icon');
+    const blob = $('relay-blob');
+
+    if (isOn) {
+        btn.textContent = 'ON';
+        btn.classList.remove('bg-gray-200', 'text-gray-400');
+        btn.classList.add('bg-emerald-400', 'text-white');
+        icon.classList.remove('text-[#d8b4fe]');
+        icon.classList.add('text-purple-600', 'animate-pulse');
+        blob.classList.add('relay-on');
+    } else {
+        btn.textContent = 'OFF';
+        btn.classList.remove('bg-emerald-400', 'text-white');
+        btn.classList.add('bg-gray-200', 'text-gray-400');
+        icon.classList.remove('text-purple-600', 'animate-pulse');
+        icon.classList.add('text-[#d8b4fe]');
+        blob.classList.remove('relay-on');
+    }
+}
+
+async function sendBLE(key, val) {
+    if (!S.rxChar) {
+        log('error: micro:bit not connected!', '#dc2626');
+        return;
+    }
+    const payload = `${key},${val}\n`;
+    try {
+        await S.rxChar.writeValue(new TextEncoder().encode(payload));
+        log(`tx → ${key},${val}`, '#b45309');
+    } catch (e) {
+        log('tx error: ' + e.message.toLowerCase(), '#dc2626');
+    }
+}
+
+function initCharts() {
+    const cfg = color => ({
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                data: [], borderColor: color,
+                backgroundColor: color + '11',
+                fill: true, tension: 0.4, pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { display: false },
+                y: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 9, family: 'Balsamiq Sans' } } }
+            }
+        }
+    });
+    S.charts['jarak']        = new Chart($('chart-jarak'),        cfg('#4a90e2'));
+    S.charts['jarak_manual'] = new Chart($('chart-jarak-manual'), cfg('#a855f7'));
+}
+
+function pushHistory(key, val) {
+    const h = S.history[key];
+    if (!h) return;
+    h.labels.push(new Date().toLocaleTimeString());
+    h.data.push(parseFloat(val) || 0);
+    if (h.labels.length > MAX_PTS) { h.labels.shift(); h.data.shift(); }
+    const ch = S.charts[key];
+    if (!ch) return;
+    ch.data.labels           = h.labels;
+    ch.data.datasets[0].data = h.data;
+    ch.update('none');
+}
+
+async function connectFirebase() {
+    const apiKey = $('fb-apiKey').value.trim();
+    const dbUrl  = $('fb-dbUrl').value.trim();
+    const path   = $('fb-path').value.trim() || 'garden/kebun1';
+    if (!apiKey || !dbUrl) { alert('Isi API Key dan Database URL!'); return; }
+    try {
+        const apps = getApps();
+        if (apps.length) await deleteApp(apps[0]);
+        const app = initializeApp({
+            apiKey,
+            databaseURL: dbUrl,
+            projectId: dbUrl.replace('https://','').split('.')[0]
+        });
+        S.db     = getDatabase(app);
+        S.fbPath = path;
+        log(`firebase connected → /${path}`, '#16a34a');
+        onValue(ref(S.db, path), snap => {
+            const d = snap.val();
+            if (!d) return;
+            ['suhu','jarak','jarak_manual','Relay','mode'].forEach(k => {
+                if (d[k] !== undefined) {
+                    handleIncoming(k, String(d[k]?.value ?? d[k]));
+                }
+            });
+        }, err => log('firebase error: ' + err.message, '#dc2626'));
+    } catch (e) {
+        log('firebase error: ' + e.message, '#dc2626');
+    }
+}
+
+$('btn-connect-ble').onclick    = connectBLE;
+$('btn-disconnect-ble').onclick = () => { if (S.device) S.device.gatt.disconnect(); };
+$('btn-connect-fb').onclick     = connectFirebase;
+$('btnClearLog').onclick        = () => { $('terminal-content').innerHTML = ''; };
+
+window.onload = () => {
+    initCharts();
+    applyModeUI('auto');  
+    log('system ready — super tripro dashboard loaded 🤖🌱');
+};
+</script>
 </body>
 </html>
