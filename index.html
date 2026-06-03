@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:ital,wght=0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
@@ -30,6 +30,8 @@
             background: linear-gradient(180deg, #d2e7f7 0%, #fbcfe8 50%, #fef08a 100%);
             font-family: 'Balsamiq Sans', cursive;
         }
+        .blob-relay { border-radius: 45% 55% 40% 60% / 55% 45% 60% 40%; }
+        .blob-suhu  { border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; }
         .floating         { animation: floating 3s   ease-in-out infinite; }
         .floating-delay-1 { animation: floating 3.5s ease-in-out infinite 0.5s; }
         .floating-delay-2 { animation: floating 4s   ease-in-out infinite 1s; }
@@ -56,15 +58,15 @@
 <body class="font-balsamiq text-gray-600 min-h-screen relative overflow-x-hidden pb-12">
 
 <header class="py-6 relative flex flex-col items-center justify-center">
-    <div class="absolute top-6 left-10 md:left-24 text-6xl floating">🤖</div>
-    <div class="absolute top-24 right-10 md:right-24 text-6xl floating-delay-1">🚀</div>
-    
-    <div class="absolute bottom-2 left-16 md:left-40 floating-delay-2">
-        <img src="https://raw.githubusercontent.com/kfai-ctrl/Super-Tripro/refs/heads/main/Group%202.png" alt="Pink Drone Robot" class="w-20 h-20 md:w-28 md:h-28 object-contain">
-    </div>
+    <img src="image_11cb22.png" alt="Super Tripro Toy Plane" class="absolute top-2 right-6 h-24 md:h-32 floating select-none pointer-events-none">
+    <img src="image_11c7a1.png" alt="Super Tripro Blue Robot" class="absolute top-24 right-4 md:right-12 h-20 md:h-28 floating-delay-1 select-none pointer-events-none">
+    <img src="image_123482.png" alt="Super Tripro Decorative Drone" class="absolute bottom-2 left-6 h-20 md:h-28 floating select-none pointer-events-none">
+    <div class="absolute bottom-2 left-16 md:left-40 text-5xl floating-delay-2">🛸</div>
     
     <div class="container mx-auto px-4 text-center relative z-10 flex flex-col items-center">
-        <img src="https://raw.githubusercontent.com/kfai-ctrl/Super-Tripro/refs/heads/main/image-removebg-preview%20(52)%201.png" alt="Super Tripro Logo" class="h-28 md:h-36 object-contain drop-shadow-md select-none pointer-events-none">
+        <img src="image_129678.jpg" alt="Super Tripro Logo" class="h-28 md:h-36 object-contain drop-shadow-md select-none pointer-events-none">
+        
+        <img src="image_11bf6a.jpg" alt="Super Tripro Base" class="h-24 md:h-32 object-contain mt-2 drop-shadow-sm floating-delay-2 select-none pointer-events-none">
     </div>
 </header>
 
@@ -193,9 +195,6 @@
             <span class="text-[11px] font-bold text-gray-400 mb-2">Chart Distance</span>
             <div class="flex-1 min-h-0"><canvas id="chart-jarak"></canvas></div>
         </div>
-        <div class="bg-white/80 rounded-2xl p-4 shadow-sm h-36 flex flex-col hidden">
-            <canvas id="chart-jarak-manual"></canvas>
-        </div>
     </div>
 
     <div class="bg-white rounded-[2rem] p-6 shadow-md border border-white/60">
@@ -232,8 +231,7 @@ const S = {
     relay: false,
     db: null, fbPath: '',
     history: {
-        jarak:        { labels: [], data: [] },
-        jarak_manual: { labels: [], data: [] }
+        jarak:        { labels: [], data: [] }
     },
     charts: {}
 };
@@ -305,11 +303,6 @@ function handleIncoming(key, val) {
             $('range-ultra1').value = Math.min(parseFloat(val) || 0, 100);
             pushHistory('jarak', val);
             break;
-        case 'jarak_manual':
-            pushHistory('jarak_manual', val);
-            break;
-        case 'suhu':
-            break;
         case 'Relay':
             applyRelayUI(val.trim() === '1');
             break;
@@ -364,21 +357,17 @@ function applyRelayUI(isOn) {
     if (isOn) {
         btnOn.className = "w-full bg-emerald-400 text-white font-bold py-2.5 rounded-xl shadow-sm transition text-xs tracking-wider uppercase";
         btnOff.className = "w-full bg-gray-100 text-gray-400 font-bold py-2.5 rounded-xl shadow-sm transition text-xs tracking-wider uppercase";
-        
         icon.classList.remove('text-[#d8b4fe]');
         icon.classList.add('text-purple-600', 'animate-pulse');
         blob.classList.add('relay-on');
-        
         led.classList.remove('text-gray-300');
         led.classList.add('text-yellow-400', 'drop-shadow-[0_0_10px_rgba(250,204,21,0.6)]');
     } else {
         btnOn.className = "w-full bg-gray-100 text-gray-400 font-bold py-2.5 rounded-xl shadow-sm transition text-xs tracking-wider uppercase";
         btnOff.className = "w-full bg-rose-400 text-white font-bold py-2.5 rounded-xl shadow-sm transition text-xs tracking-wider uppercase";
-        
         icon.classList.remove('text-purple-600', 'animate-pulse');
         icon.classList.add('text-[#d8b4fe]');
         blob.classList.remove('relay-on');
-        
         led.classList.remove('text-yellow-400', 'drop-shadow-[0_0_10px_rgba(250,204,21,0.6)]');
         led.classList.add('text-gray-300');
     }
@@ -418,8 +407,7 @@ function initCharts() {
             }
         }
     });
-    S.charts['jarak']        = new Chart($('chart-jarak'),        cfg('#4a90e2'));
-    S.charts['jarak_manual'] = new Chart($('chart-jarak-manual'), cfg('#a855f7'));
+    S.charts['jarak'] = new Chart($('chart-jarak'), cfg('#4a90e2'));
 }
 
 function pushHistory(key, val) {
@@ -454,7 +442,7 @@ async function connectFirebase() {
         onValue(ref(S.db, path), snap => {
             const d = snap.val();
             if (!d) return;
-            ['suhu','jarak','jarak_manual','Relay','mode'].forEach(k => {
+            ['suhu','jarak','Relay','mode'].forEach(k => {
                 if (d[k] !== undefined) {
                     handleIncoming(k, String(d[k]?.value ?? d[k]));
                 }
