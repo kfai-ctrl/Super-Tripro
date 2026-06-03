@@ -55,16 +55,13 @@
 </head>
 <body class="font-balsamiq text-gray-600 min-h-screen relative overflow-x-hidden pb-12">
 
-<header class="py-12 relative flex flex-col items-center justify-center">
+<header class="py-6 relative flex flex-col items-center justify-center">
     <div class="absolute top-6 left-10 md:left-24 text-6xl floating">🤖</div>
     <div class="absolute top-24 right-10 md:right-24 text-6xl floating-delay-1">🚀</div>
     <div class="absolute bottom-2 left-16 md:left-40 text-5xl floating-delay-2">🛸</div>
     
     <div class="container mx-auto px-4 text-center relative z-10 flex flex-col items-center">
-        <h1 class="text-5xl md:text-6xl font-extrabold tracking-wider text-[#f59e0b] drop-shadow-[0_4px_0_rgba(180,83,9,1)] italic uppercase mb-2">
-            SUPER TRIPRO
-        </h1>
-        <div class="w-24 h-1 bg-[#f59e0b] rounded-full shadow-sm"></div>
+        <img src="image_129678.jpg" alt="Super Tripro Logo" class="h-28 md:h-36 object-contain drop-shadow-md select-none pointer-events-none">
     </div>
 </header>
 
@@ -127,7 +124,7 @@
                     <i class="ph-bold ph-cube text-[#4a90e2] text-xl"></i>
                     <h3 class="text-sm font-bold text-gray-700 tracking-wide">Ultrasonic sensor</h3>
                 </div>
-                <div class="flex items-center gap-3 my-2">
+                <div class="flex items-end gap-3 my-2">
                     <div class="bg-gray-50 border border-gray-100 text-gray-700 text-2xl font-bold py-1.5 px-4 rounded-xl min-w-[80px] text-center shadow-inner">
                         <span id="val-ultra1">--</span>
                     </div>
@@ -337,13 +334,11 @@ function applyModeUI(mode) {
     $('btn-auto').className   = isAuto  ? active : inactive;
     $('btn-manual').className = !isAuto ? active : inactive;
     
-    // Status tombol Relay didalam panel kontrol manual
     $('btn-relay-on').disabled = isAuto;
     $('btn-relay-off').disabled = isAuto;
     log(`mode ui update → ${mode}`, '#7e22ce');
 }
 
-// Fungsi tombol ON dan OFF terpisah didalam card Relay
 window.setRelayDirect = function(shouldOn) {
     if (S.mode === 'auto') {
         log('cannot control relay in auto mode.', '#dc2626');
@@ -371,7 +366,6 @@ function applyRelayUI(isOn) {
         icon.classList.add('text-purple-600', 'animate-pulse');
         blob.classList.add('relay-on');
         
-        // Perubahan komponen indikator LED
         led.classList.remove('text-gray-300');
         led.classList.add('text-yellow-400', 'drop-shadow-[0_0_10px_rgba(250,204,21,0.6)]');
     } else {
@@ -382,7 +376,6 @@ function applyRelayUI(isOn) {
         icon.classList.add('text-[#d8b4fe]');
         blob.classList.remove('relay-on');
         
-        // Perubahan komponen indikator LED
         led.classList.remove('text-yellow-400', 'drop-shadow-[0_0_10px_rgba(250,204,21,0.6)]');
         led.classList.add('text-gray-300');
     }
